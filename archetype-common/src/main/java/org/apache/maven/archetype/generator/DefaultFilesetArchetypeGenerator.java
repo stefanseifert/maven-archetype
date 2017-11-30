@@ -150,7 +150,12 @@ public class DefaultFilesetArchetypeGenerator
             Thread.currentThread().setContextClassLoader( archetypeJarLoader );
 
             // execute pre-generation script
-            executeGenerationScript( request, archetypeFile, Constants.ARCHETYPE_PRE_GENERATION_SCRIPT );
+            String preGenerationScript = archetypeArtifactManager.getPreGenerationScript( archetypeFile );
+            if ( preGenerationScript != null )
+            {
+                getLogger().info( "Executing script: " + Constants.ARCHETYPE_PRE_GENERATION_SCRIPT );
+                executeGenerationScript( request, archetypeFile, preGenerationScript );
+            }
 
             if ( archetypeDescriptor.isPartial() )
             {
@@ -212,7 +217,12 @@ public class DefaultFilesetArchetypeGenerator
             }
 
             // execute post-generation script
-            executeGenerationScript( request, archetypeFile, Constants.ARCHETYPE_POST_GENERATION_SCRIPT );
+            String postGenerationScript = archetypeArtifactManager.getPostGenerationScript( archetypeFile );
+            if ( postGenerationScript != null )
+            {
+                getLogger().info( "Executing script: " + Constants.ARCHETYPE_POST_GENERATION_SCRIPT );
+                executeGenerationScript( request, archetypeFile, postGenerationScript );
+            }
 
             // ----------------------------------------------------------------------
             // Log message on OldArchetype creation
@@ -253,33 +263,27 @@ public class DefaultFilesetArchetypeGenerator
     }
     
     private void executeGenerationScript( ArchetypeGenerationRequest request, File archetypeFile,
-            String scriptName ) throws UnknownArchetype
+            String script ) throws UnknownArchetype
     {
-        String postGenerationScript = archetypeArtifactManager.getPostGenerationScript( archetypeFile );
-        if ( postGenerationScript != null )
+        Binding binding = new Binding();
+
+        final Properties archetypeGeneratorProperties = new Properties();
+        archetypeGeneratorProperties.putAll( System.getProperties() );
+
+        if ( request.getProperties() != null )
         {
-            getLogger().info( "Executing script: " + scriptName );
-
-            Binding binding = new Binding();
-
-            final Properties archetypeGeneratorProperties = new Properties();
-            archetypeGeneratorProperties.putAll( System.getProperties() );
-
-            if ( request.getProperties() != null )
-            {
-                archetypeGeneratorProperties.putAll( request.getProperties() );
-            }
-
-            for ( Map.Entry<Object, Object> entry : archetypeGeneratorProperties.entrySet() )
-            {
-                binding.setVariable( entry.getKey().toString(), entry.getValue() );
-            }
-
-            binding.setVariable( "request", request );
-
-            GroovyShell shell = new GroovyShell( binding );
-            shell.evaluate( postGenerationScript );
+            archetypeGeneratorProperties.putAll( request.getProperties() );
         }
+
+        for ( Map.Entry<Object, Object> entry : archetypeGeneratorProperties.entrySet() )
+        {
+            binding.setVariable( entry.getKey().toString(), entry.getValue() );
+        }
+
+        binding.setVariable( "request", request );
+
+        GroovyShell shell = new GroovyShell( binding );
+        shell.evaluate( script );
     }
 
     public String getPackageAsDirectory( String packageName )
