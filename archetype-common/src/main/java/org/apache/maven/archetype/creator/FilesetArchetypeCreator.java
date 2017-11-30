@@ -145,23 +145,8 @@ public class FilesetArchetypeCreator
             File archetypeDescriptorFile = new File( archetypeResourcesDirectory, Constants.ARCHETYPE_DESCRIPTOR );
             archetypeDescriptorFile.getParentFile().mkdirs();
 
-            File archetypePostGenerationScript =
-                new File( archetypeResourcesDirectory, Constants.ARCHETYPE_POST_GENERATION_SCRIPT );
-            archetypePostGenerationScript.getParentFile().mkdirs();
-
-            if ( request.getProject().getBuild() != null && CollectionUtils.isNotEmpty(
-                request.getProject().getBuild().getResources() ) )
-            {
-                for ( Resource resource : request.getProject().getBuild().getResources() )
-                {
-                    File inputFile = new File(
-                        resource.getDirectory() + File.separator + Constants.ARCHETYPE_POST_GENERATION_SCRIPT );
-                    if ( inputFile.exists() )
-                    {
-                        FileUtils.copyFile( inputFile, archetypePostGenerationScript );
-                    }
-                }
-            }
+            prepareGenerationScript( request, archetypeResourcesDirectory, Constants.ARCHETYPE_PRE_GENERATION_SCRIPT );
+            prepareGenerationScript( request, archetypeResourcesDirectory, Constants.ARCHETYPE_POST_GENERATION_SCRIPT );
 
             getLogger().debug( "Starting archetype's descriptor " + project.getArtifactId() );
             ArchetypeDescriptor archetypeDescriptor = new ArchetypeDescriptor();
@@ -304,6 +289,28 @@ public class FilesetArchetypeCreator
         {
             result.setCause( e );
         }
+    }
+    
+    private void prepareGenerationScript( ArchetypeCreationRequest request, File archetypeResourcesDirectory,
+            String scriptName ) throws IOException
+    {
+        File archetypePostGenerationScript =
+            new File( archetypeResourcesDirectory, scriptName );
+        archetypePostGenerationScript.getParentFile().mkdirs();
+
+        if ( request.getProject().getBuild() != null && CollectionUtils.isNotEmpty(
+            request.getProject().getBuild().getResources() ) )
+        {
+            for ( Resource resource : request.getProject().getBuild().getResources() )
+            {
+                File inputFile = new File(
+                    resource.getDirectory() + File.separator + scriptName );
+                if ( inputFile.exists() )
+                {
+                    FileUtils.copyFile( inputFile, archetypePostGenerationScript );
+                }
+            }
+        }        
     }
 
     /**

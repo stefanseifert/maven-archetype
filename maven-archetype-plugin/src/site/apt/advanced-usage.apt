@@ -157,6 +157,16 @@ Configuration
     When used, the property file takes precedence over the system properties.
     It is also the only way to define additional properties in the archetype.
     
+Pre-generation script
+
+	If the user wants to customize the generation properties before starting the actual generation
+	(e.g. to compute new properties from user-given-properties), a groovy script
+	named <<<archetype-pre-generate.groovy>>> can be added in <<<src/main/resources/META-INF/>>>.
+	This script will end up in the generated archetype's <<<META-INF>>> folder and will be executed
+	upon creating a project from this archetype. This groovy script has access to the 
+	<<<ArchetypeGenerationRequest>>> object, as well as all the <<<System.getProperties()>>> and all
+	the archetype generation properties the user has specified.
+	
 Post-generation script
 
 	If the user wants to customize the generated project even further, a groovy script

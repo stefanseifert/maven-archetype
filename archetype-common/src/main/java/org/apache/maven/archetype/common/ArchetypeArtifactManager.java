@@ -87,6 +87,17 @@ public interface ArchetypeArtifactManager
                     List<ArtifactRepository> repos, ProjectBuildingRequest buildingRequest );
 
     /**
+     * Get the archetype file's pre-generation script content, read as UTF-8 content.
+     * 
+     * @param archetypeFile the archetype file
+     * @return the archetype file's pre-generation script content or <code>null</code> if there is no script in the
+     *   archetype
+     * @throws UnknownArchetype
+     */
+    String getPreGenerationScript( File archetypeFile )
+        throws UnknownArchetype;
+
+    /**
      * Get the archetype file's post-generation script content, read as UTF-8 content.
      * 
      * @param archetypeFile the archetype file

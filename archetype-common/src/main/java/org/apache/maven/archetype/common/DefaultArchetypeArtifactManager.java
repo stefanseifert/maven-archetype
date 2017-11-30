@@ -1,5 +1,7 @@
 package org.apache.maven.archetype.common;
 
+import org.apache.commons.collections.IteratorUtils;
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -300,13 +302,24 @@ public class DefaultArchetypeArtifactManager
         }
     }
 
+    public String getPreGenerationScript( File archetypeFile ) throws UnknownArchetype
+    {
+        return getGenerationScript( archetypeFile, Constants.ARCHETYPE_PRE_GENERATION_SCRIPT );
+    }
+
     public String getPostGenerationScript( File archetypeFile ) throws UnknownArchetype
     {
+        return getGenerationScript( archetypeFile, Constants.ARCHETYPE_POST_GENERATION_SCRIPT );
+    }
+
+    private String getGenerationScript( File archetypeFile, String scriptName ) throws UnknownArchetype
+    {
         ZipFile zipFile = null;
+        Reader reader = null;
         try
         {
             zipFile = getArchetypeZipFile( archetypeFile );
-            Reader reader = getDescriptorReader( zipFile, Constants.ARCHETYPE_POST_GENERATION_SCRIPT );
+            reader = getDescriptorReader( zipFile, scriptName );
             return reader == null ? null : IOUtils.toString( reader );
         }
         catch ( IOException e )
@@ -315,6 +328,7 @@ public class DefaultArchetypeArtifactManager
         }
         finally
         {
+            IOUtils.closeQuietly( reader );
             closeZipFile( zipFile );
         }
     }

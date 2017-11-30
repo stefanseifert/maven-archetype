@@ -149,6 +149,9 @@ public class DefaultFilesetArchetypeGenerator
 
             Thread.currentThread().setContextClassLoader( archetypeJarLoader );
 
+            // execute pre-generation script
+            executeGenerationScript( request, archetypeFile, Constants.ARCHETYPE_PRE_GENERATION_SCRIPT );
+
             if ( archetypeDescriptor.isPartial() )
             {
                 getLogger().debug( "Processing partial archetype " + archetypeDescriptor.getName() );
@@ -208,32 +211,8 @@ public class DefaultFilesetArchetypeGenerator
                                       outputDirectoryFile, packageName, archetypeDescriptor, context );
             }
 
-            String postGenerationScript = archetypeArtifactManager.getPostGenerationScript( archetypeFile );
-            if ( postGenerationScript != null )
-            {
-                getLogger().info( "Executing " + Constants.ARCHETYPE_POST_GENERATION_SCRIPT
-                    + " post-generation script" );
-
-                Binding binding = new Binding();
-
-                final Properties archetypeGeneratorProperties = new Properties();
-                archetypeGeneratorProperties.putAll( System.getProperties() );
-
-                if ( request.getProperties() != null )
-                {
-                    archetypeGeneratorProperties.putAll( request.getProperties() );
-                }
-
-                for ( Map.Entry<Object, Object> entry : archetypeGeneratorProperties.entrySet() )
-                {
-                    binding.setVariable( entry.getKey().toString(), entry.getValue() );
-                }
-
-                binding.setVariable( "request", request );
-
-                GroovyShell shell = new GroovyShell( binding );
-                shell.evaluate( postGenerationScript );
-            }
+            // execute post-generation script
+            executeGenerationScript( request, archetypeFile, Constants.ARCHETYPE_POST_GENERATION_SCRIPT );
 
             // ----------------------------------------------------------------------
             // Log message on OldArchetype creation
@@ -270,6 +249,36 @@ public class DefaultFilesetArchetypeGenerator
         finally
         {
             Thread.currentThread().setContextClassLoader( old );
+        }
+    }
+    
+    private void executeGenerationScript( ArchetypeGenerationRequest request, File archetypeFile,
+            String scriptName ) throws UnknownArchetype
+    {
+        String postGenerationScript = archetypeArtifactManager.getPostGenerationScript( archetypeFile );
+        if ( postGenerationScript != null )
+        {
+            getLogger().info( "Executing script: " + scriptName );
+
+            Binding binding = new Binding();
+
+            final Properties archetypeGeneratorProperties = new Properties();
+            archetypeGeneratorProperties.putAll( System.getProperties() );
+
+            if ( request.getProperties() != null )
+            {
+                archetypeGeneratorProperties.putAll( request.getProperties() );
+            }
+
+            for ( Map.Entry<Object, Object> entry : archetypeGeneratorProperties.entrySet() )
+            {
+                binding.setVariable( entry.getKey().toString(), entry.getValue() );
+            }
+
+            binding.setVariable( "request", request );
+
+            GroovyShell shell = new GroovyShell( binding );
+            shell.evaluate( postGenerationScript );
         }
     }
 
