@@ -62,7 +62,7 @@ public class DefaultArchetypeGeneratorTest
     private final static Archetype ARCHETYPE_OLD = new Archetype( "archetypes", "old", "1.0" );
 
     private final static Archetype ARCHETYPE_FILESET_WITH_POSTCREATE_SCRIPT =
-            new Archetype( "archetypes", "fileset_with_postscript", "1.0" );
+        new Archetype( "archetypes", "fileset_with_postscript", "1.0" );
 
     private final static Archetype ARCHETYPE_FILESET_WITH_PRE_AND_POSTCREATE_SCRIPT =
             new Archetype( "archetypes", "fileset_with_pre_and_postscript", "1.0" );
@@ -432,7 +432,7 @@ public class DefaultArchetypeGeneratorTest
     }
 
     public void testGenerateArchetypeWithPostScriptIncluded()
-            throws Exception
+        throws Exception
     {
         System.out.println( "testGenerateArchetypeWithPostScriptIncluded" );
 
@@ -513,7 +513,6 @@ public class DefaultArchetypeGeneratorTest
 
     }
 
-    /*
     public void testGenerateArchetypeWithPreAndPostScriptIncluded()
             throws Exception
     {
@@ -528,73 +527,18 @@ public class DefaultArchetypeGeneratorTest
 
         generateProjectFromArchetype( request );
 
-        assertTemplateContentGeneratedWithFileSetArchetype( "src/main/java/file/value/package/App.java", "file-value" );
-        assertTemplateContentGeneratedWithFileSetArchetype( "src/main/java/file/value/package/inner/package/App2.java",
-                                                            "file-value" );
-
-        assertTemplateCopiedWithFileSetArchetype( "src/main/java/file/value/package/App.ogg" );
-
         File templateFile = new File( projectDirectory, "src/main/java/file/value/package/ToDelete.java" );
         assertFalse( templateFile + " should have been removed (by post-generate.groovy script", templateFile.exists() );
 
-        assertTemplateContentGeneratedWithFileSetArchetype( "src/main/resources/App.properties", "file-value" );
-        assertTemplateContentGeneratedWithFileSetArchetype( "src/main/resources/file-value/touch.txt", "file-value" );
-        assertTemplateContentGeneratedWithFileSetArchetype( "src/main/resources/file-value/touch_root.txt",
-                                                            "file-value" );
+        assertTemplateContentGeneratedWithFileSetArchetype( "text.txt", "file-value" );
 
-        assertTemplateCopiedWithFileSetArchetype( "src/main/resources/some-dir/App.png" );
-
-        assertTemplateContentGeneratedWithFileSetArchetype( "src/site/site.xml", "file-value" );
-        assertTemplateContentGeneratedWithFileSetArchetype( "src/site/apt/usage.apt", "file-value" );
-        assertTemplateContentGeneratedWithFileSetArchetype( ".classpath", "file-value" );
-        assertTemplateContentGeneratedWithFileSetArchetype( "profiles.xml", "file-value" );
-
-        Model model = readPom( projectFile );
-        assertNull( model.getParent() );
-        assertEquals( "file-value", model.getGroupId() );
-        assertEquals( "file-value", model.getArtifactId() );
-        assertEquals( "file-value", model.getVersion() );
-
-        assertTemplateContentGeneratedWithFileSetArchetype( "subproject/src/main/java/file/value/package/App.java",
-                                                            "subproject" );
-
-        model = readPom( new File( projectDirectory, "subproject/pom.xml" ) );
-        assertNotNull( model.getParent() );
-        assertEquals( "file-value", model.getParent().getGroupId() );
-        assertEquals( "file-value", model.getParent().getArtifactId() );
-        assertEquals( "file-value", model.getParent().getVersion() );
-        assertEquals( "file-value", model.getGroupId() );
-        assertEquals( "subproject", model.getArtifactId() );
-        assertEquals( "file-value", model.getVersion() );
-
-        assertTemplateContentGeneratedWithFileSetArchetype(
-            "subproject/subsubproject/src/main/java/file/value/package/App.java", "subsubproject" );
-
-        assertTemplateContentGeneratedWithFileSetArchetype( "subproject/subsubproject/src/main/java/file/value/package/"
-                                                                + "file-value/inner/subsubproject/innest/Somefile-valueClasssubsubproject.java",
-                                                            "subsubproject" );
-
-        assertTemplateContentGeneratedWithFileSetArchetype( "subproject/subsubproject/src/main/java/file/value/package/"
-                                                                + "ArbitraryProperty-file-value.java",
-                                                            "subsubproject" );
-
-        // Test that undefined properties are safely ignored (and skipped)
-        assertTemplateContentGeneratedWithFileSetArchetype( "subproject/subsubproject/src/main/java/file/value/package/"
-                                                                + "SkipsUndefinedProperty-__undefined-property__-file-value.java",
-                                                            "subsubproject" );
-
-        model = readPom( new File( projectDirectory, "subproject/subsubproject/pom.xml" ) );
-        assertNotNull( model.getParent() );
-        assertEquals( "file-value", model.getParent().getGroupId() );
-        assertEquals( "subproject", model.getParent().getArtifactId() );
-        assertEquals( "file-value", model.getParent().getVersion() );
-        assertEquals( "file-value", model.getGroupId() );
-        assertEquals( "subsubproject", model.getArtifactId() );
-        assertEquals( "file-value", model.getVersion() );
+        Properties properties = loadProperties( "text.txt" );
+        assertEquals( "custom-value-1", properties.getProperty( "property-with-default-1" ) );
+        assertEquals( "custom-value-2", properties.getProperty( "property-without-default-1" ) );
+        assertEquals( "custom-value-3", properties.getProperty( "custom-property" ) );
 
     }
-*/
-    
+
     protected void tearDown()
         throws Exception
     {
